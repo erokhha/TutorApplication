@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.tutorhammerapplication"
+    namespace = "com.example.tutorhammer"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.tutorhammerapplication"
+        applicationId = "com.example.tutorhammer"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+
+    implementation("androidx.navigation:navigation-compose:2.9.1")
 
     testImplementation(libs.junit)
 
