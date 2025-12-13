@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     implementation("androidx.navigation:navigation-compose:2.9.1")
+    implementation("androidx.navigation:navigation-runtime-ktx:2.9.1")
+
 
     testImplementation(libs.junit)
 

@@ -1,4 +1,6 @@
 package com.example.tutorhammer
+import com.example.tutorhammer.ui.tutor.lessons.LessonsListScreen
+
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,18 +16,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-
-            // создаём контроллер навигации
-            val navController = rememberNavController()
-
-            // общий фон приложения
             Surface(
                 modifier = Modifier,
                 color = Color(0xFF171717)
             ) {
-                // запускаем навигацию
-                AppNavGraph(navController)
+                // Показываем твоё окно без навигации
+                LessonsListScreen()
             }
         }
+
     }
 }
+

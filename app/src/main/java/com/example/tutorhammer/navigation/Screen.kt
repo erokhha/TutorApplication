@@ -5,4 +5,6 @@ sealed class Screen(val route: String) {
     data object Registration : Screen("registration")
 }
 
+// ggfgf
+
 // todo: надо отрисовать старт скрин
