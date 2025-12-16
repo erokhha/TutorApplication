@@ -1,67 +1,46 @@
-from fastapi import APIRouter, HTTPException
-from app.schemas.auth import (
-    TutorRegisterIn,
-    TutorExtraRegisterIn,
-    StudentRegisterIn,
-    LoginIn,
-    AuthOut,
-)
-from app.schemas.user import UserRole
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends, HTTPException
 
-router = APIRouter(
-    prefix="/auth",
-    tags=["Auth"]
-)
+from app.db.session import get_db
+from app.models.user import User
+from app.models.tutor import Tutor
+from app.core.security import hash_value
+from app.schemas.auth import TutorRegisterIn, AuthOut
 
 
-# Регистрация репетитора (шаг 1)
 @router.post("/register/tutor", response_model=AuthOut)
-def register_tutor(data: TutorRegisterIn):
-    # 🔹 тут позже будет создание User + TutorProfile
-    # 🔹 сейчас делаем заглушку
+async def register_tutor(
+    data: TutorRegisterIn,
+    db: AsyncSession = Depends(get_db),
+):
+    # проверка телефона
+    existing_user = await db.scalar(
+        User.__table__.select().where(User.phone == data.phone)
+    )
+    if existing_user:
+        raise HTTPException(400, "Пользователь с таким телефоном уже существует")
+
+    user = User(
+        first_name=data.first_name,
+        last_name=data.last_name,
+        phone=data.phone,
+        role="tutor",
+        password_hash=hash_value(data.password),
+    )
+    db.add(user)
+    await db.flush()  # получаем user.id
+
+    tutor = Tutor(
+        user_id=user.id,
+        email=data.email,
+        inn_hash=hash_value(data.inn),
+        tax_password_hash=hash_value(data.tax_password),
+    )
+    db.add(tutor)
+
+    await db.commit()
 
     return {
-        "access_token": "fake-token-for-tutor",
-        "token_type": "bearer"
-    }
-
-
-
-# Доп. регистрация репетитора (шаг 2)
-
-@router.post("/register/tutor/extra")
-def register_tutor_extra(data: TutorExtraRegisterIn):
-    # тут позже будет сохранение ИНН и пароля налоговой
-    return {
-        "status": "ok"
-    }
-
-
-
-# Регистрация ученика
-
-@router.post("/register/student", response_model=AuthOut)
-def register_student(data: StudentRegisterIn):
-    # 🔹 тут позже будет:
-    # - создание User (role=student)
-    # - привязка к репетитору по tutor_inn
-
-    return {
-        "access_token": "fake-token-for-student",
-        "token_type": "bearer"
-    }
-
-
-
-# Логин (только репетитор)
-
-@router.post("/login", response_model=AuthOut)
-def login(data: LoginIn):
-
-    if data.phone.startswith("+700"):
-        raise HTTPException(status_code=403, detail="Students do not have password login")
-
-    return {
-        "access_token": "fake-login-token",
-        "token_type": "bearer"
+        "access_token": f"fake-token-user-{user.id}",
+        "token_type": "bearer",
     }
