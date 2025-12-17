@@ -1,56 +1,47 @@
-from pydantic import BaseModel, Field, model_validator
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
 
 
 
 # Регистрация репетитора
 
-class TutorRegisterIn(BaseModel):
-    first_name: str = Field(..., min_length=1)
-    last_name: str = Field(..., min_length=1)
-    phone: str = Field(..., min_length=10)
-    email: Optional[str] = None
-
-    password: str = Field(..., min_length=6)
-    password_confirm: str = Field(..., min_length=6)
-
-    @model_validator(mode="after")
-    def passwords_match(self):
-        if self.password != self.password_confirm:
-            raise ValueError("Passwords do not match")
-        return self
-
-
-
-# Доп. регистрация репетитора
-
-class TutorExtraRegisterIn(BaseModel):
-    inn: str = Field(..., min_length=10)
-    tax_password: str = Field(..., min_length=4)
+class TutorRegisterRequest(BaseModel):
+    full_name: str = Field(
+        ...,
+        min_length=3,
+        description="ФИО репетитора одной строкой"
+    )
+    phone: str = Field(
+        ...,
+        min_length=10,
+        description="Номер телефона"
+    )
+    email: EmailStr = Field(
+        ...,
+        description="Почта репетитора"
+    )
+    password: str = Field(
+        ...,
+        min_length=6,
+        description="Пароль для входа"
+    )
+    inn: str = Field(
+        ...,
+        min_length=10,
+        max_length=12,
+        description="ИНН репетитора (используется как код)"
+    )
+    fns_password: str = Field(
+        ...,
+        min_length=6,
+        description="Пароль от ФНС"
+    )
 
 
 
 # Регистрация ученика
 
-class StudentRegisterIn(BaseModel):
-    first_name: str = Field(..., min_length=1)
-    last_name: str = Field(..., min_length=1)
-    phone: str = Field(..., min_length=10)
-
-    grade: str = Field(..., min_length=1)
-    tutor_inn: str = Field(..., min_length=10)
-
-
-
-# Логин (только репетитор)
-
-class LoginIn(BaseModel):
-    phone: str = Field(..., min_length=10)
-    password: str = Field(..., min_length=6)
-
-
-
-class AuthOut(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-
+class StudentRegisterRequest(BaseModel):
+    full_name: str = Field(min_length=3)
+    phone: str = Field(min_length=10)
+    grade: int = Field(ge=1, le=11)
+    tutor_inn: str = Field(min_length=10, max_length=12)
