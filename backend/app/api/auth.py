@@ -28,3 +28,40 @@ async def register_student_endpoint(
     db: AsyncSession = Depends(get_db),
 ):
     return await register_student(data, db)
+
+from app.schemas.auth import (
+    TutorLoginRequest,
+    StudentLoginRequest,
+    LoginResponse,
+)
+from app.services.auth import login_tutor, login_student
+
+
+# LOGIN TUTOR
+
+@router.post("/login/tutor", response_model=LoginResponse)
+async def login_tutor_endpoint(
+    data: TutorLoginRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        return await login_tutor(data, db)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+
+# LOGIN STUDENT
+
+@router.post("/login/student")
+async def login_student_endpoint(
+    data: StudentLoginRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        return await login_student(data, db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+

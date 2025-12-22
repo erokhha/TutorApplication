@@ -11,3 +11,9 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     role: UserRole
+from pydantic import BaseModel
+
+
+class CurrentUserResponse(BaseModel):
+    user_id: int
+    role: str
